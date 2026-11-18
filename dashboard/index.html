@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — pre-token protocols ranked by implied launch value</title>
+<meta name="description" content="A radar for protocols that record no token yet, ranked by what a launch would be worth, each with the steps to farm it.">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<a class="skip" href="#board-wrap">Skip to the board</a>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="pulse" aria-hidden="true"></span>
+      <div>
+        <h1>Token Radar</h1>
+        <p class="tagline">Which pre-token protocol is worth farming next — and what to do about it.</p>
+      </div>
+    </div>
+    <p class="meta" id="snapshot-meta">Loading the sealed snapshot…</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stats" id="stats" aria-label="Coverage summary"></section>
+
+  <nav class="tabs" aria-label="Views">
+    <button type="button" class="tab active" data-view="board" aria-pressed="true">Radar board</button>
+    <button type="button" class="tab" data-view="live" aria-pressed="false">Live tokens <span class="tab-note">for comparison</span></button>
+    <button type="button" class="tab" data-view="model" aria-pressed="false">How the value is figured</button>
+  </nav>
+
+  <section id="view-board" aria-label="Ranked board">
+    <div class="controls" id="board-wrap">
+      <label class="field grow">
+        <span>Search</span>
+        <input type="search" id="q" placeholder="Protocol name or slug…" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Category</span>
+        <select id="category"><option value="">All categories</option></select>
+      </label>
+      <label class="field">
+        <span>Chain</span>
+        <select id="chain"><option value="">All chains</option></select>
+      </label>
+      <label class="field">
+        <span>Sort by</span>
+        <select id="sort">
+          <option value="value">Implied value ↓</option>
+          <option value="tvl">TVL ↓</option>
+          <option value="growth">7-day change ↓</option>
+          <option value="age">Age ↓</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="watchlist-only">
+        <span>Watchlist only</span>
+      </label>
+    </div>
+    <p class="count" id="count" role="status"></p>
+    <div class="table-scroll">
+      <table id="board-table">
+        <thead>
+          <tr>
+            <th data-sort="rank" scope="col">Rank</th>
+            <th data-sort="name" scope="col">Protocol</th>
+            <th data-sort="category" scope="col">Category</th>
+            <th scope="col">Chains</th>
+            <th data-sort="tvl" scope="col" class="num">TVL</th>
+            <th data-sort="growth" scope="col" class="num">7d</th>
+            <th data-sort="age" scope="col" class="num">Age</th>
+            <th data-sort="value" scope="col" class="num">Implied value</th>
+            <th scope="col"><span class="sr">Detail</span></th>
+          </tr>
+        </thead>
+        <tbody id="board-body"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="board-empty" hidden>No protocol matches these filters. Loosen the search or pick another category.</p>
+  </section>
+
+  <section id="view-detail" aria-label="Protocol detail" hidden>
+    <button type="button" class="back" id="back">← Back to the board</button>
+    <div id="detail"></div>
+  </section>
+
+  <section id="view-live" aria-label="Live tokens" hidden>
+    <p class="intro">These protocols already trade. They are the comparables the peer multiple is
+    priced from — shown at the market's own values, never ranked on the board above.</p>
+    <div class="table-scroll">
+      <table id="live-table">
+        <thead>
+          <tr>
+            <th scope="col">Protocol</th>
+            <th scope="col">Category</th>
+            <th scope="col">Token</th>
+            <th scope="col" class="num">TVL</th>
+            <th scope="col" class="num">Market cap</th>
+            <th scope="col" class="num">Mcap / TVL</th>
+            <th scope="col" class="num">7d</th>
+          </tr>
+        </thead>
+        <tbody id="live-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="view-model" aria-label="How the value is figured" hidden>
+    <h2>How the value is figured</h2>
+    <p class="intro">Every number on this page is computed from the sealed snapshot by the program
+    that built it — nothing is hand-typed, and no protocol name is special-cased. The valuation is
+    a peer multiple: live protocols tell us what the market pays per dollar of TVL, and a
+    pre-token protocol is priced at its own category's multiple.</p>
+    <div class="formula">
+      <p><strong>implied value</strong> = TVL × peer multiple × growth × seasoning × reach</p>
+      <ul>
+        <li><strong>Peer multiple</strong> — the median market-cap-to-TVL ratio of live-token protocols in the same category (at least 3 peers; otherwise the median over every live protocol), clamped to 0.05–2.0.</li>
+        <li><strong>Growth</strong> — 1 + the 7-day TVL change, clamped to −50%…+150%, weighted 0.4.</li>
+        <li><strong>Seasoning</strong> — 0.7 rising to 1.0 over two years tracked with no token; an unknown listing date counts as one year.</li>
+        <li><strong>Reach</strong> — 1.00 rising 0.03 per extra chain, up to four: more chains, more surface for a launch.</li>
+      </ul>
+    </div>
+    <h3>Peer multiples used on this snapshot</h3>
+    <div class="table-scroll">
+      <table id="multiples-table">
+        <thead>
+          <tr><th scope="col">Category</th><th scope="col" class="num">Live peers</th><th scope="col" class="num">Multiple</th></tr>
+        </thead>
+        <tbody id="multiples-body"></tbody>
+      </table>
+    </div>
+    <p class="note" id="model-note"></p>
+  </section>
+
+  <footer>
+    <p><strong>Read this before farming.</strong> “Records no token” means DefiLlama's record carries
+    no token for the protocol — it is not proof that none exists. Implied values are this entry's own
+    estimates from the snapshot's figures, never a prediction that a token launches, or when, and
+    never a claim make.fun makes. Farm plans name real actions with their costs; a plan is not
+    financial advice, and no step is worth more than you can afford to lose.</p>
+    <p id="provenance"></p>
+  </footer>
+</main>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
