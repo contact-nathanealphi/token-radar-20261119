@@ -77,6 +77,9 @@ export const MODEL: ModelConstants = {
 /** The model's version label, shown in the dashboard and the board. */
 export const MODEL_VERSION = 'peer-multiple-1';
 
+/** The gate's ceiling on one row's implied value (reference/gate.json). */
+export const IMPLIED_VALUE_CAP = 100_000_000_000_000;
+
 /** How many live-token protocols the Live view carries, by market cap. */
 export const LIVE_ROWS = 24;
 
@@ -461,7 +464,7 @@ export function checkBoard(board: BoardRow[], snapshot: Snapshot): string | null
   if (board.length >= 2 && board.every((r) => r.implied_value_usd === board[0]!.implied_value_usd)) return 'every row shares one implied value: not a ranking';
   for (const r of board) {
     if (r.name.trim() === '') return `${r.slug} has an empty name`;
-    if (!Number.isSafeInteger(r.implied_value_usd) || r.implied_value_usd <= 0 || r.implied_value_usd > 100_000_000_000_000) return `${r.slug} has implied value ${r.implied_value_usd}`;
+    if (!Number.isSafeInteger(r.implied_value_usd) || r.implied_value_usd <= 0 || r.implied_value_usd > IMPLIED_VALUE_CAP) return `${r.slug} has implied value ${r.implied_value_usd}`;
     if (r.farm_steps.length < 3 || r.farm_steps.length > 12) return `${r.slug} has ${r.farm_steps.length} farm steps`;
     for (const s of r.farm_steps) {
       const n = s.trim().length;
